@@ -12,8 +12,6 @@ export default {
   output: {
     filename: 'bundle.js',
     path: _resolve(__dirname, 'dist'),
-    libraryTarget: 'commonjs',
-    library: 'result',
   },
   module: {
     rules: [
