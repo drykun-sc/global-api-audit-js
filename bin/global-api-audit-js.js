@@ -20,7 +20,6 @@ async function getPackageMain(packageName) {
     const packageJson = JSON.parse(await readFile(packagePath, 'utf8'));
     return packageJson.main;
   } catch (error) {
-    console.log(`Package ${packageName} not found locally. Installing temporarily...`);
     try {
       execSync(`npm install ${packageName} --no-save`, { stdio: 'inherit' });
       const packagePath = pathResolve(process.cwd(), 'node_modules', packageName, 'package.json');
@@ -103,14 +102,10 @@ async function runWebpack(entryPath) {
         reject(err || new Error('Webpack compilation failed'));
         return;
       }
-      
-      console.log('Webpack compilation completed successfully');
-      
-      // Clean up the bundle.js file
+
       try {
         const bundlePath = pathResolve(projectRoot, 'tmp/bundle.js');
         await unlink(bundlePath);
-        console.log('Cleaned up bundle.js file');
       } catch (cleanupError) {
         console.warn('Warning: Could not delete bundle.js file:', cleanupError.message);
       }
@@ -149,19 +144,15 @@ async function main() {
     
     if (isRelativePath || isAbsolutePath || hasFileExtension || (hasPathSeparators && !looksLikeNpmPackage)) {
       entryPath = pathResolve(process.cwd(), input);
-      console.log(`Processing file: ${entryPath}`);
     } else {
-      console.log(`Processing NPM package: ${input}`);
       const mainFile = await getPackageMain(input);
       if (!mainFile) {
         throw new Error(`Package ${input} does not have a main entry point`);
       }
       entryPath = pathResolve(process.cwd(), 'node_modules', input, mainFile);
-      console.log(`Package main file: ${entryPath}`);
     }
 
     await runWebpack(entryPath);
-    console.log('Global API audit completed successfully');
   } catch (error) {
     console.error('Error:', error.message);
     process.exit(1);

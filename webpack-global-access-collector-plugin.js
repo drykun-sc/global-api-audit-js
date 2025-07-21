@@ -1,8 +1,7 @@
-import { writeFile } from 'fs';
-
 class WebpackGlobalAccessCollectorPlugin {
 
   constructor() {
+    this.fileAccesses = new Map(); // Map of file path to Set of API names
     this.allGlobalAccesses = new Set();
   }
 
@@ -18,12 +17,16 @@ class WebpackGlobalAccessCollectorPlugin {
             loaderContext.metadataHandler = function(metadata) {
               if (metadata && metadata.currentFileAccesses) {
                 if (metadata.currentFileAccesses.size > 0) {
-                  console.log(`${loaderContext.resourcePath}:`);
+                  const filePath = loaderContext.resourcePath;
+                  if (!pluginInstance.fileAccesses.has(filePath)) {
+                    pluginInstance.fileAccesses.set(filePath, new Set());
+                  }
+                  
+                  metadata.currentFileAccesses.forEach(access => {
+                    pluginInstance.fileAccesses.get(filePath).add(access);
+                    pluginInstance.allGlobalAccesses.add(access);
+                  });
                 }
-                metadata.currentFileAccesses.forEach(access => {
-                  console.log(`  ${access}`);
-                  pluginInstance.allGlobalAccesses.add(access);
-                });
               }
             };
           }
@@ -33,16 +36,22 @@ class WebpackGlobalAccessCollectorPlugin {
     compiler.hooks.afterEmit.tapAsync(
       'WebpackGlobalAccessCollectorPlugin',
       (compilation, callback) => {
-        const outputFilePath = compilation.outputOptions.path + '/global-accesses.json';
-        const dataToSave = [...this.allGlobalAccesses];
-        writeFile(outputFilePath, JSON.stringify(dataToSave, null, 2), (err) => {
-          if (err) {
-            console.error('Error writing global access data:', err);
-            return callback(err);
-          }
-          console.log(`Global access data saved to ${outputFilePath}`);
-          callback();
-        });
+        const files = [];
+        for (const [filePath, apiNames] of this.fileAccesses) {
+          files.push({
+            file: filePath,
+            apiNames: [...apiNames]
+          });
+        }
+        
+        const dataToSave = {
+          files: files,
+          aggregated: [...this.allGlobalAccesses]
+        };
+        
+        console.log(JSON.stringify(dataToSave, null, 2));
+        
+        callback();
       }
     );
   }
