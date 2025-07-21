@@ -1,0 +1,19 @@
+{
+  "name": "global-api-audit-js",
+  "version": "1.0.0",
+  "description": "Audit JavaScript projects for global API usage.",
+  "bin": {
+    "global-api-audit-js": "./bin/global-api-audit-js.js",
+    "babel-only-audit": "./bin/babel-only-audit.js"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@babel/core": "^7.28.0",
+    "@babel/preset-env": "^7.28.0",
+    "@babel/preset-typescript": "^7.27.1",
+    "babel-loader": "^10.0.0",
+    "ts-loader": "^9.5.2",
+    "webpack": "^5.100.2",
+    "webpack-cli": "^6.0.1"
+  }
+}
