@@ -1,9 +1,11 @@
 import { knownBuiltIns } from './knownBuiltIns.js';
+import { nodeCoreModules } from 'module';
 
 export default function ({ types: t }) {
   return {
     pre(file) {
-      file.metadata.currentFileAccesses = new Set();
+      file.metadata.globalIdentifiersAccesses = new Set();
+      file.metadata.nodeCoreModulesAccesses = new Set();
     },
     visitor: {
       Identifier(path, state) {
@@ -76,7 +78,7 @@ export default function ({ types: t }) {
           return;
         }
 
-        state.file.metadata.currentFileAccesses.add(name);
+        state.file.metadata.globalIdentifiersAccesses.add(name);
       },
 
       MemberExpression(path, state) {
@@ -88,16 +90,45 @@ export default function ({ types: t }) {
         }
 
         const objectName = object.name;
+        const call = `${objectName}.${property.name}`;
 
-        if (path.scope.hasBinding(objectName)) {
+        if (knownBuiltIns.has(call)) {
           return;
         }
 
-        if (knownBuiltIns.has(objectName)) {
-          return;
-        }
+        if (state.file.metadata.nodeCoreModulesAccesses.has(objectName)) {
+          state.file.metadata.nodeCoreModulesAccesses.add(call);
+        } else {
+          if (path.scope.hasBinding(objectName)) {
+            return;
+          }
 
-        state.file.metadata.currentFileAccesses.add(`${objectName}.${property.name}`);
+          if (knownBuiltIns.has(objectName)) {
+            return;
+          }
+
+          state.file.metadata.globalIdentifiersAccesses.add(call);
+        }
+      },
+
+      CallExpression(path, state) {
+        const callee = path.node.callee;
+        const args = path.node.arguments;
+
+        if (
+          t.isIdentifier(callee) &&
+          callee.name === 'require' &&
+          args.length === 1 &&
+          t.isStringLiteral(args[0])
+        ) {
+          const modulePath = args[0].value;
+
+          if (!nodeCoreModules.includes(modulePath)) {
+            return;
+          }
+
+          state.file.metadata.nodeCoreModulesAccesses.add(`${modulePath}`);
+        }
       },
     },
   };
