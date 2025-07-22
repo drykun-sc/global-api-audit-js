@@ -45,16 +45,17 @@ function createWebpackConfig(entryPath) {
           test: /\.ts$/,
           use: [
             {
-              loader: 'babel-loader',
+              loader: pathResolve(projectRoot, 'node_modules/babel-loader'),
               options: {
                 metadataSubscribers: ['metadataHandler'],
+                presets: ['@babel/preset-env'],
                 plugins: [BabelGlobalAccessTrackerPlugin],
                 babelrc: false,
                 configFile: false,
               },
             },
             {
-              loader: 'ts-loader',
+              loader: pathResolve(projectRoot, 'node_modules/ts-loader'),
               options: {
                 transpileOnly: true,
               },
@@ -63,9 +64,10 @@ function createWebpackConfig(entryPath) {
         },
         {
           test: /\.js$/,
-          loader: 'babel-loader',
+          loader: pathResolve(projectRoot, 'node_modules/babel-loader'),
           options: {
             metadataSubscribers: ['metadataHandler'],
+            presets: ['@babel/preset-env'],
             plugins: [BabelGlobalAccessTrackerPlugin],
             babelrc: false,
             configFile: false,
@@ -75,6 +77,10 @@ function createWebpackConfig(entryPath) {
     },
     resolve: {
       extensions: ['.ts', '.js'],
+      modules: [
+        pathResolve(projectRoot, 'node_modules'),
+        'node_modules'
+      ],
       fallback: {
         "http": false,
         "https": false,

@@ -1,6 +1,6 @@
 {
   "name": "global-api-audit-js",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Audit JavaScript projects for global API usage.",
   "main": "index.js",
   "bin": {
@@ -29,6 +29,8 @@
     "node": ">=16.0.0"
   },
   "dependencies": {
+    "@babel/core": "^7.24.0",
+    "@babel/preset-env": "^7.24.0",
     "babel-loader": "^10.0.0",
     "ts-loader": "^9.5.2",
     "webpack": "^5.100.2"
