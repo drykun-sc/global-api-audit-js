@@ -1,6 +1,6 @@
 {
   "name": "global-api-audit-js",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Audit JavaScript projects for global API usage.",
   "bin": {
     "global-api-audit-js": "./bin/global-api-audit-js.js"
