@@ -1,14 +1,13 @@
-import { resolve as pathResolve } from 'path';
 import BabelGlobalAccessTrackerPlugin from './babel-global-access-tracker-plugin.js';
 import WebpackGlobalAccessCollectorPlugin from './webpack-global-access-collector-plugin.js';
 
-export function createWebpackConfig(entryPath, projectRoot, dirName) {
+export function createWebpackConfig(entryPath, outputDirName, outputFileName) {
   return {
     entry: entryPath,
     mode: 'development',
     output: {
-      filename: 'bundle.js',
-      path: pathResolve(dirName, '../tmp'),
+      filename: outputFileName,
+      path: outputDirName,
     },
     module: {
       rules: [
@@ -16,7 +15,7 @@ export function createWebpackConfig(entryPath, projectRoot, dirName) {
           test: /\.ts$/,
           use: [
             {
-              loader: pathResolve(projectRoot, 'node_modules/babel-loader'),
+              loader: 'babel-loader',
               options: {
                 metadataSubscribers: ['metadataHandler'],
                 presets: ['@babel/preset-env'],
@@ -26,7 +25,7 @@ export function createWebpackConfig(entryPath, projectRoot, dirName) {
               },
             },
             {
-              loader: pathResolve(projectRoot, 'node_modules/ts-loader'),
+              loader: 'ts-loader',
               options: {
                 transpileOnly: true,
               },
@@ -35,7 +34,7 @@ export function createWebpackConfig(entryPath, projectRoot, dirName) {
         },
         {
           test: /\.js$/,
-          loader: pathResolve(projectRoot, 'node_modules/babel-loader'),
+          loader: 'babel-loader',
           options: {
             metadataSubscribers: ['metadataHandler'],
             presets: ['@babel/preset-env'],
@@ -47,11 +46,6 @@ export function createWebpackConfig(entryPath, projectRoot, dirName) {
       ],
     },
     resolve: {
-      extensions: ['.ts', '.js'],
-      modules: [
-        pathResolve(projectRoot, 'node_modules'),
-        'node_modules'
-      ],
       fallback: {
         "http": false,
         "https": false,
