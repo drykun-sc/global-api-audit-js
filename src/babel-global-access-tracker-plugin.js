@@ -1,4 +1,4 @@
-import { knownBuiltIns } from './knownBuiltIns.js';
+import { knownBuiltIns } from '../knownBuiltIns.js';
 import { builtinModules as nodeCoreModules } from 'module';
 
 export default function ({ types: t }) {
