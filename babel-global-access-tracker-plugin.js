@@ -1,5 +1,5 @@
 import { knownBuiltIns } from './knownBuiltIns.js';
-import { nodeCoreModules } from 'module';
+import { builtinModules as nodeCoreModules } from 'module';
 
 export default function ({ types: t }) {
   return {
