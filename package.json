@@ -15,16 +15,16 @@
     "webpack",
     "babel"
   ],
-  "author": "Your Name <your.email@example.com>",
+  "author": "Dmytro Rykun <dmytrorykun@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/global-api-audit-js.git"
+    "url": "https://github.com/drykun-sc/global-api-audit-js.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/global-api-audit-js/issues"
+    "url": "https://github.com/drykun-sc/global-api-audit-js/issues"
   },
-  "homepage": "https://github.com/yourusername/global-api-audit-js#readme",
+  "homepage": "https://github.com/drykun-sc/global-api-audit-js#readme",
   "engines": {
     "node": ">=16.0.0"
   },
