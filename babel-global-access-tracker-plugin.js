@@ -78,6 +78,27 @@ export default function ({ types: t }) {
 
         state.file.metadata.currentFileAccesses.add(name);
       },
+
+      MemberExpression(path, state) {
+        const object = path.node.object;
+        const property = path.node.property;
+
+        if (!t.isIdentifier(object)) {
+          return;
+        }
+
+        const objectName = object.name;
+
+        if (path.scope.hasBinding(objectName)) {
+          return;
+        }
+
+        if (knownBuiltIns.has(objectName)) {
+          return;
+        }
+
+        state.file.metadata.currentFileAccesses.add(`${objectName}.${property.name}`);
+      },
     },
   };
 };
