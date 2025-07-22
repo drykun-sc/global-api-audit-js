@@ -31,17 +31,6 @@ global-api-audit-js path/to/your/file.js
 global-api-audit-js @namespace/package
 ```
 
-## Or Simply Run with NPX
-No installation needed.
-
-```bash
-# Analyze a specific file
-npx global-api-audit-js path/to/your/file.js
-
-# Analyze a NPM package
-npx global-api-audit-js @namespace/package
-```
-
 ## Configuration
 
 No additional configuration is required.
