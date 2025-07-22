@@ -18,12 +18,15 @@ class WebpackGlobalAccessCollectorPlugin {
               if (metadata && metadata.currentFileAccesses) {
                 if (metadata.currentFileAccesses.size > 0) {
                   const filePath = loaderContext.resourcePath;
-                  if (!pluginInstance.fileAccesses.has(filePath)) {
-                    pluginInstance.fileAccesses.set(filePath, new Set());
+                  // Drop leading path components up to and including node_modules/
+                  const normalizedFilePath = filePath.replace(/^.*?node_modules\//, '');
+                  
+                  if (!pluginInstance.fileAccesses.has(normalizedFilePath)) {
+                    pluginInstance.fileAccesses.set(normalizedFilePath, new Set());
                   }
                   
                   metadata.currentFileAccesses.forEach(access => {
-                    pluginInstance.fileAccesses.get(filePath).add(access);
+                    pluginInstance.fileAccesses.get(normalizedFilePath).add(access);
                     pluginInstance.allGlobalAccesses.add(access);
                   });
                 }
