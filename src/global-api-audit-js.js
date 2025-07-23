@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { join } from 'path';
+import { join, basename } from 'path';
 import { readFileSync, accessSync, rmSync, mkdtempSync, existsSync } from 'fs';
 import { tmpdir } from 'os';
 import { execSync } from 'child_process';
@@ -41,9 +41,10 @@ function tryExistingPackage(packageName) {
 function tryInstallingPackage(packageName, tempDirPath) {
     const originalCwd = process.cwd();
     process.chdir(tempDirPath);
-    execSync(`npm install ${packageName} --no-save`, { stdio: 'inherit' });
+    execSync(`npm install ${packageName} --no-save --prefix . --no-package-lock --production`);
     process.chdir(originalCwd);
-    return join(tempDirPath, 'node_modules', packageName);
+    const packagePath = join(tempDirPath, 'node_modules', packageName);
+    return packagePath;
 }
 
 function getPackageMain(packagePath) {
@@ -54,7 +55,8 @@ function getPackageMain(packagePath) {
     if (!mainFile) {
         throw new Error(`Package ${packageName} does not have a main entry point`);
     }
-    return join(packagePath, mainFile);
+    const mainFilePath = join(basename(packagePath), mainFile);
+    return mainFilePath;
 }
 
 function handlePackage(packageName, tempDirPath) {
@@ -72,6 +74,28 @@ function handlePackage(packageName, tempDirPath) {
     return getPackageMain(packagePath);
 }
 
+function runWebpack(entryPath, tempDirPath, needsCwd) {
+    const config = createWebpackConfig(entryPath, tempDirPath, 'bundle.js');
+    const originalCwd = process.cwd();
+    if (needsCwd) {
+        process.chdir(tempDirPath);
+    }
+    webpack(config, (err, stats) => {
+        if (err || stats.hasErrors()) {
+            console.error('Webpack compilation failed:');
+            if (err) {
+                console.error(err);
+            }
+            if (stats && stats.hasErrors()) {
+                console.error(stats.toString({colors: true, errorDetails: true}));
+            }
+        }
+    });
+    if (needsCwd) {
+        process.chdir(originalCwd);
+    }
+}
+
 function main() {
     const args = process.argv.slice(2);
     
@@ -87,24 +111,12 @@ function main() {
     try {
         // trying to resolve as a source file relative to the current working directory
         let entryPath = join(process.cwd(), input);
-        if (!existsSync(entryPath)) {
+        if (existsSync(entryPath)) {
+            runWebpack(entryPath, tempDirPath, false);
+        } else {
             // assuning this is a package name
             entryPath = handlePackage(input, tempDirPath);
-        }
-        if (existsSync(entryPath)) {
-            const config = createWebpackConfig(entryPath, tempDirPath, 'bundle.js');
-        
-            webpack(config, async (err, stats) => {
-                if (err || stats.hasErrors()) {
-                    console.error('Webpack compilation failed:');
-                    if (err) {
-                        console.error(err);
-                    }
-                    if (stats && stats.hasErrors()) {
-                        console.error(stats.toString({colors: true, errorDetails: true}));
-                    }
-                }
-            });
+            runWebpack(entryPath, tempDirPath, true);
         }
     } catch (error) {
         console.error('Error:', error.message);

@@ -1,7 +1,10 @@
 import BabelGlobalAccessTrackerPlugin from './babel-global-access-tracker-plugin.js';
 import WebpackGlobalAccessCollectorPlugin from './webpack-global-access-collector-plugin.js';
+import { join } from 'path';
 
 export function createWebpackConfig(entryPath, outputDirName, outputFileName) {
+  const tempNodeModulesPath = join(outputDirName, 'node_modules');
+
   return {
     entry: entryPath,
     mode: 'development',
@@ -46,6 +49,7 @@ export function createWebpackConfig(entryPath, outputDirName, outputFileName) {
       ],
     },
     resolve: {
+      modules: [tempNodeModulesPath, 'node_modules'], 
       fallback: {
         "http": false,
         "https": false,
@@ -89,4 +93,4 @@ export function createWebpackConfig(entryPath, outputDirName, outputFileName) {
       new WebpackGlobalAccessCollectorPlugin(),
     ],
   };
-} 
+}
